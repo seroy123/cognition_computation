@@ -19,5 +19,5 @@ class MLP:
         pass
 
     def train(self, train_data: np.ndarray, labels: np.ndarray):
-        # feedforward
+        # feedforward3
         pass
