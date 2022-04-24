@@ -1,16 +1,20 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import numpy as np
+import MLP
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
+def call_MLP(X,Y):
+    mlp = MLP.MLP([15, 15, 1], ['ReLU']*3)
+    for ind in range(len(X)):
+        x = X[ind,:]
+        y = Y[ind]
+        input_size = len(x)
+        mlp.weight_initialization(input_size)
+        A,Z = mlp.forward_prop(x)
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    with open("./DATA_TRAIN.csv") as file_name:
+        array = np.loadtxt(file_name, delimiter=",")
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    X = array[:,[0,1]]
+    Y = array[:,2]
+    call_MLP(X, Y)
+
