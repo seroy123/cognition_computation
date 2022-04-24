@@ -3,7 +3,7 @@ import MLP
 
 
 def call_MLP(X,Y):
-    mlp = MLP.MLP([15, 15, 1], ['ReLU']*3)
+    mlp = MLP.MLP([15, 15, 1], ['ReLU'] * 3)
     for ind in range(len(X)):
         x = X[ind,:]
         y = Y[ind]

@@ -2,53 +2,75 @@ import numpy as np
 
 
 class MLP:
-    def __init__(self, layer_num: list, actv_func: list):
-        # actve_func - activation function per layer in a list.
+    def __init__(self, layer_num: list, active_func: list):
+        # active_func - activation function per layer in a list.
         # layer_num is a list of number of neurons in each layer. f.e [80 80 80] is a 3 layered net of 80 neurons in
         # each layer.
         self.layer_num = layer_num
-        self.actv_func = actv_func
-        if len(self.actv_func) != len(self.layer_num):
+        self.active_func = active_func
+        if len(self.active_func) != len(self.layer_num):
             raise("number of activation functions must equal to number of layers")
+        self.weights = []
+        self.bias = []
 
-    def weight_initialization(self, input_size):
-        bias = lambda layer_size: np.zeros([1, layer_size])
-        self.weights = [np.append(np.random.rand(input_size, self.layer_num[0]), bias(self.layer_num[0]),axis=0).T]+ \
-                       [np.append(np.random.rand(self.layer_num[ind-1],
-                        self.layer_num[ind]),bias(self.layer_num[ind]),axis=0).T for ind in range(1, len(self.layer_num))]
-        # + 1 for the n_neurons in each layer for bias
+    def weight_initialization(self):
+        # TODO: add an option for a different method (f.e. xavier)
+        # TODO: look where yonatan explained how to do it
+        self.bias = [np.random.randn(layer,1) for layer in self.layer_num]
+        for layer, next_layer in zip(self.layer_num[:-1], self.layer_num[1:]):
+            self.weights += np.random.randn(layer, next_layer)
 
-    def train(self, train_data: np.ndarray, labels: np.ndarray):
+    def gradient_descent(self, batch_data: np.ndarray, batch_labels: np.ndarray):
         # TODO: maybe initialize weights here so you will have input size and make a field with bias initialization method
-        input_size = train_data.size[1]
-        self.weight_initialization(input_size)  # initialize weights
-        # feed propagation
+        # ΔW=-ηδ(w)*s.T
+        Delta_B= [np.zeros(b.shape) for b in self.bias]
+        Delta_W = [np.zeros(W.shape) for W in self.weights]
+        #TODO: make train data the size we want(batch)
+        batch_size = len(batch_labels)
+        for ind in range(batch_size):
+            x = batch_data[ind, :]
+            y0 = batch_labels[ind]
+            Z, A = self.forward_prop(x)
+            delta_B, delta_W = self.backward_prop(Z, A, x, y0)
+            Delta_B = [prev_Delta_B + current_Delta_B for prev_Delta_B, current_Delta_B in zip(Delta_B, delta_B)]
+            Delta_W = [prev_Delta_W + current_Delta_W for prev_Delta_W, current_Delta_W in zip(Delta_W, delta_W)]
+        self.weights = [weight - (1 / batch_size) * current_Delta_W for weight, current_Delta_W in
+                        zip(self.weights, Delta_W)]
+        self.bias = [bias - (1 / batch_size) * current_Delta_B for bias, current_Delta_B in
+                     zip(self.bias, Delta_B)]
 
-        # back propagation
-        pass
 
     def forward_prop(self, X):
-        Z = [self.weights[0][:, :-1].dot(X) + self.weights[0][:, -1]]  # input layer
-        A = self.ReLU(Z)
-        for ind, layer in enumerate(self.weights[1:]):
-            Z += layer[:, :-1].dot(Z[ind])+layer[:,-1]
-            A += self.ReLU(Z[-1])
+        A = []
+        Z = []
+        # Z = [self.weights[0][:, :-1].dot(X) + self.weights[0][:, -1]]  # input layer
+        # A = self.ReLU(Z)
+        for bias, weight, current_sigma in zip(self.bias, self.weights, self.active_func):
+            current_Z = weight.T @ current_A + bias if Z else weight.T @ X + bias
+            current_A = current_sigma(current_Z)
+            Z.append(current_Z)
+            A.append(current_A)
         return Z, A
 
     def backward_prop(self, Z, A, X, Y):
-        dz = [A[-1] - Y]
-        dw = [dz[0].dot(A[-2].T)]
-        #  loop through layers
-        for ind, layer in enumerate(self.weights[:-1]):
-            pass
-        #one_hot_Y = one_hot(Y)
-        dZ2 = A2  # - one_hot_Y
-        dW2 = 1 / m * dZ2.dot(A1.T)
-        db2 = 1 / m * np.sum(dZ2)
-        dZ1 = W2.T.dot(dZ2) * self.ReLU_deriv(Z1)
-        dW1 = 1 / m * dZ1.dot(X.T)
-        db1 = 1 / m * np.sum(dZ1)
-        return dW1, db1, dW2, db2
+        #TODO: create func_derivative method
+        hidden_layers_number = len(self.layer_num)-2  # removing input and output layer
+        delta_W = [np.zeros(W.shape) for W in self.weights]
+        delta_B = [np.zeros(B.shape) for B in self.bias]
+        for layer in range(hidden_layers_number,-1,-1):
+            # delta = func_derivative()
+            delta = self.ReLU_deriv(Z[layer]) * (self.weights[layer+1] @ delta if layer != hidden_layers_number else
+                                                 (A[layer]-Y) * self.ReLU_deriv(Z[layer]))
+            delta_B[layer] = delta
+            delta_W[layer] = A[layer - 1] @ delta.T if layer != 0 else X @ delta.T
+
+        return delta_B, delta_W
+
+    def train(self, epochs, training_data, labels):
+        for i in range(epochs):
+            for mini_batch in training_data:
+                #TODO: divide to batchs in a seprate function that will receive as input the batch size
+                self.gradient_descent(mini_batch, labels)
 
     def ReLU(self,Z):
         return np.maximum(Z, 0)
