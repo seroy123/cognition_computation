@@ -3,13 +3,8 @@ import MLP
 
 
 def call_MLP(X,Y):
-    mlp = MLP.MLP([15, 15, 1], ['ReLU'] * 3)
-    for ind in range(len(X)):
-        x = X[ind,:]
-        y = Y[ind]
-        input_size = len(x)
-        mlp.weight_initialization(input_size)
-        A,Z = mlp.forward_prop(x)
+    mlp = MLP.MLP([2, 15, 1], [MLP.MLP.ReLU] * 3)
+    mlp.train(20,X,Y)
 if __name__ == '__main__':
     with open("./DATA_TRAIN.csv") as file_name:
         array = np.loadtxt(file_name, delimiter=",")
