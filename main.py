@@ -4,7 +4,7 @@ import MLP
 
 def call_MLP(X, Y):
     mlp = MLP.MLP([2, 15, 1], [MLP.MLP.ReLU] * 3)
-    mlp.train(20, X, Y)
+    mlp.train(20, X, Y, eta=0.01)
     return mlp
 
 
