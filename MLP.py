@@ -1,5 +1,5 @@
 import copy
-
+import WeightInitializations
 import numpy as np
 
 
@@ -16,13 +16,7 @@ class MLP:
         self.bias = []
 
     def weight_initialization(self):
-        # TODO: add an option for a different method (f.e. xavier)
-        # TODO: look where yonatan explained how to do it
-        # set the bias of each layer in a random way
-        self.bias = [np.random.randn(1, 1) for layer in range(len(self.layer_num)-1)]
-        # set random weights
-        for layer, next_layer in zip(self.layer_num[:-1], self.layer_num[1:]):
-            self.weights += [np.random.randn(layer, next_layer)]
+        self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).random_initialization()
 
     def gradient_descent(self, data: np.ndarray, label: np.ndarray, eta):
         # TODO: maybe initialize weights here so you will have input size and make a field with bias initialization method
