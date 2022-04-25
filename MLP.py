@@ -10,7 +10,7 @@ class MLP:
         # each layer.
         self.layer_num = layer_num
         self.active_func = active_func
-        if len(self.active_func) != len(self.layer_num):
+        if len(self.active_func) != len(self.layer_num) - 1:
             raise ("number of activation functions must equal to number of layers")
         self.weights = []
         self.bias = []
@@ -25,16 +25,17 @@ class MLP:
         delta_B, delta_W = self.backward_prop(Z, A, data, label)
         # ΔW=-ηδ(w)
         # Delta_W[1] = Delta_W[1].T
-        Delta_B = -eta * delta_B
+        Delta_B = delta_B
+        for i in range(len(delta_B)):
+            Delta_B[i] = -eta * delta_B[i]
         Delta_W = delta_W
         for i in range(len(delta_W)):
             Delta_W[i] = -eta * delta_W[i]
         # Delta_W[1] = Delta_W[1].T
         # update weights and bias
-        # TODO: eta
-        self.weights = [weight - current_Delta_W for weight, current_Delta_W in
+        self.weights = [weight + current_Delta_W for weight, current_Delta_W in
                         zip(self.weights, Delta_W)]
-        self.bias = [bias - current_Delta_B for bias, current_Delta_B in
+        self.bias = [bias + current_Delta_B for bias, current_Delta_B in
                      zip(self.bias, Delta_B)]
 
     def forward_prop(self, X):
@@ -43,8 +44,7 @@ class MLP:
         # go over all the network (all the layers)
         for bias, weight, current_sigma in zip(self.bias, self.weights, self.active_func):
             # multiply each layer with the layer's input and add the bias
-            current_weights_and_input_multiplication = weight.T @ current_activation_func_ans + bias \
-                if weights_and_input_multiplication else weight.T @ X + bias
+            current_weights_and_input_multiplication = weight.T @ current_activation_func_ans.T + bias if weights_and_input_multiplication else weight.T @ X + bias
             # TODO: current_A = current_sigma(current_Z)
             # use the activation function on the multiplication answer
             current_activation_func_ans = self.ReLU(current_weights_and_input_multiplication)
@@ -63,15 +63,15 @@ class MLP:
         for layer in range(hidden_layers_number, -1, -1):
             # TODO: delta = func_derivative()
             # get delta
+            if layer != hidden_layers_number:
+                temp = copy.copy(delta)
             delta = self.ReLU_deriv(weights_and_input_multiplication[layer]) * (
-                    self.weights[layer + 1] @ delta.T) if layer != hidden_layers_number else \
+                    self.weights[layer + 1] @ delta).T if layer != hidden_layers_number else \
                 (activation_func_ans[layer] - Y).T * self.ReLU_deriv(weights_and_input_multiplication[layer])
             # update delta bias to be delta
             delta_B[layer] = delta
             # update delta weights by delta
-            delta_W[layer] = np.ravel(activation_func_ans[layer - 1])[np.newaxis].T @ delta[
-                np.newaxis] if layer != 0 else \
-                np.ravel(X)[np.newaxis].T @ delta[np.newaxis]
+            delta_W[layer] = np.ravel(activation_func_ans[layer - 1])[np.newaxis].T @ delta if layer != 0 else np.ravel(X)[np.newaxis].T @ delta
         return delta_B, delta_W
 
     def train(self, epochs, training_data, labels, eta):
@@ -80,7 +80,7 @@ class MLP:
             for ind in range(len(labels)):
                 X = training_data[ind, :]
                 Y = labels[ind]
-                self.gradient_descent(X, Y, eta)
+                self.gradient_descent(X, Y, eta(i))
 
     def ReLU(self, Z):
         return np.maximum(Z, 0)
