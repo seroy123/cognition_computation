@@ -51,8 +51,6 @@ class MLP:
     def forward_prop(self, X):
         A = []
         Z = []
-        # Z = [self.weights[0][:, :-1].dot(X) + self.weights[0][:, -1]]  # input layer
-        # A = self.ReLU(Z)
         for bias, weight, current_sigma in zip(self.bias, self.weights, self.active_func):
             current_Z = weight.T @ current_A + bias[0] if Z else weight.T @ X + bias[0]
             # current_A = current_sigma(current_Z)
