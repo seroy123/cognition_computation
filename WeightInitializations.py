@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.random import rand
 from numpy import mean
+from math import sqrt
 
 
 class WeightInitializations:
@@ -20,7 +21,7 @@ class WeightInitializations:
         for layer, next_layer in zip(self.layer_num[:-1], self.layer_num[1:]):
             previous_layer_node_number = layer
             # calculate the range for the weights
-            lower, upper = -(1.0 / (previous_layer_node_number)^(1/2)), (1.0 / (previous_layer_node_number)^(1/2))
+            lower, upper = -(1.0 / sqrt(previous_layer_node_number)), (1.0 / (previous_layer_node_number)^(1/2))
             # generate random weights and scale them to the desired range
             weights += [lower + np.random.randn(layer, next_layer) * (upper - lower)]
         return weights, bias
@@ -31,7 +32,7 @@ class WeightInitializations:
         for layer, next_layer in zip(self.layer_num[:-1], self.layer_num[1:]):
             previous_layer_node_number = layer
             # calculate the range for the weights
-            std = (2.0 / previous_layer_node_number)^(1/2)
+            std = sqrt(2.0 / previous_layer_node_number)
             # generate random weights and scale them to the desired range
             weights += [np.random.randn(layer, next_layer) * std]
         return weights, bias
