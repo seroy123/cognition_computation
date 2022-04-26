@@ -1,4 +1,6 @@
 import copy
+import math
+
 import WeightInitializations
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,25 +20,6 @@ class MLP:
 
     def weight_initialization(self):
         self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).random_initialization()
-
-    def gradient_descent(self, data: np.ndarray, label: np.ndarray, eta):
-        # do feedforward and back propagation
-        Z, A = self.forward_prop(data)
-        delta_B, delta_W = self.backward_prop(Z, A, data, label)
-        # ΔW=-ηδ(w)
-        # Delta_W[1] = Delta_W[1].T
-        Delta_B = delta_B
-        for i in range(len(delta_B)):
-            Delta_B[i] = -eta * delta_B[i]
-        Delta_W = delta_W
-        for i in range(len(delta_W)):
-            Delta_W[i] = -eta * delta_W[i]
-        Delta_W[0] = Delta_W[0].T
-        # update weights and bias
-        self.weights = [weight + current_Delta_W for weight, current_Delta_W in
-                        zip(self.weights, Delta_W)]
-        self.bias = [bias + current_Delta_B for bias, current_Delta_B in
-                     zip(self.bias, Delta_B)]
 
     def forward_prop(self, X):
         activation_func_ans = []
@@ -69,13 +52,32 @@ class MLP:
                 temp = copy.copy(delta)
             delta = self.ReLU_deriv(weights_and_input_multiplication[layer]).T * (
                     temp @ self.weights[layer + 1].T) if layer != hidden_layers_number else \
-                (activation_func_ans[layer] - Y) * self.ReLU_deriv(weights_and_input_multiplication[layer])
+                1/2*(Y-activation_func_ans[layer]) * self.ReLU_deriv(weights_and_input_multiplication[layer])
             # update delta bias to be delta
-            delta_B[layer] = 0
+            delta_B[layer] = delta
             # update delta weights by delta
-            delta_W[layer] = (delta.T @ (activation_func_ans[layer - 1].T)).T\
+            delta_W[layer] = (activation_func_ans[layer - 1] @ delta).T\
                 if layer != 0 else (np.ravel(X)[np.newaxis].T @ delta).T
         return delta_B, delta_W
+
+    def gradient_descent(self, data: np.ndarray, label: np.ndarray, eta):
+        # do feedforward and back propagation
+        Z, A = self.forward_prop(data)
+        delta_B, delta_W = self.backward_prop(Z, A, data, label)
+        # ΔW=-ηδ(w)
+        # Delta_W[1] = Delta_W[1].T
+        Delta_B = delta_B
+        for i in range(len(delta_B)):
+            Delta_B[i] = -eta * delta_B[i]
+        Delta_W = delta_W
+        for i in range(len(delta_W)):
+            Delta_W[i] = -eta * delta_W[i]
+
+        # update weights and bias
+        self.weights = [weight + current_Delta_W.T for weight, current_Delta_W in
+                        zip(self.weights, Delta_W)]
+        self.bias = [bias + current_Delta_B.T for bias, current_Delta_B in
+                     zip(self.bias, Delta_B)]
 
     def train(self, epochs, training_data, labels, eta):
         self.weight_initialization()
@@ -95,10 +97,10 @@ class MLP:
         plt.show()
 
     def ReLU(self, Z):
-        return np.maximum(Z, 0)
+        return np.maximum(Z, 0)# np.ravel([math.sin(val) for val in np.ravel(Z)])[np.newaxis].T#
 
     def ReLU_deriv(self, Z):
-        return Z > 0
+        return Z > 0# np.ravel([math.cos(val) for val in np.ravel(Z)])[np.newaxis].T #
 
     def predict(self, test_data: np.ndarray):
         pass
