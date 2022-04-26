@@ -17,7 +17,7 @@ class MLP:
         self.bias = []
 
     def weight_initialization(self):
-        self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).he_initialization()
+        self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).random_initialization()
 
     def gradient_descent(self, data: np.ndarray, label: np.ndarray, eta):
         # do feedforward and back propagation
@@ -30,7 +30,7 @@ class MLP:
             Delta_B[i] = -eta * delta_B[i]
         Delta_W = delta_W
         for i in range(len(delta_W)):
-            Delta_W[i] = -eta * delta_W[i]
+            Delta_W[i] = eta * delta_W[i]
         Delta_W[0] = Delta_W[0].T
         # update weights and bias
         self.weights = [weight + current_Delta_W for weight, current_Delta_W in
