@@ -23,7 +23,7 @@ class WeightInitializations:
             # calculate the range for the weights
             lower, upper = -(1.0 / sqrt(previous_layer_node_number)), (1.0 / sqrt(previous_layer_node_number))
             # generate random weights and scale them to the desired range
-            weights += [lower + np.random.randn(layer, next_layer) * (upper - lower)]
+            weights += [lower + np.random.randn(next_layer, layer) * (upper - lower)]
         return weights, bias
 
     def he_initialization(self):
