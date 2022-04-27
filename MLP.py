@@ -100,6 +100,12 @@ class MLP:
         plt.plot(epoch_axis, y_axis)
         plt.title(f"Convergence on training set with l1+l2 and {'out optimizer' if not self.optimizer[0] else self.optimizer[0]}")
         plt.show()
+        plt.scatter(training_data[[val == 1 for val in labels], :][:, 0],
+                    training_data[[val == 1 for val in labels], :][:, 1])
+        plt.scatter(training_data[[val == 0 for val in labels], :][:, 0],
+                    training_data[[val == 0 for val in labels], :][:, 1])
+        plt.title(f"The prediction rate on the training set is: {accuracy}")
+        plt.show()
 
     @staticmethod
     def ReLU(Z):

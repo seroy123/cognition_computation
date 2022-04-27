@@ -11,8 +11,8 @@ def call_MLP(X_train, Y_train, layers, optimizer, regularization):
 
 
 def get_classification_over_validation(mlp):
-    with open("./DATA_TRAIN.csv") as file_name:
-        validation_set = np.loadtxt(file_name, delimiter=",")
+    with open("./DATA_valid.csv") as file_name2:
+        validation_set = np.loadtxt(file_name2, delimiter=",")
     X_validation = validation_set[:, [0, 1]]
     Y_validation = validation_set[:, 2]
     X_validation, Y_validation = shuffle(X_validation, Y_validation)
@@ -38,5 +38,5 @@ if __name__ == '__main__':
     # select number of hidden layers
     number_of_hidden_layers = [30]
     # optimizer = (method, value(for momentum), regularization = (method, lambda value, penalty parameter value)
-    trained_mlp = call_MLP(X, Y, [2] + number_of_hidden_layers + [1], optimizer=('momentum',0.5), regularization=('l1+l2',0.5,0.5))
+    trained_mlp = call_MLP(X, Y, [2] + number_of_hidden_layers + [1], optimizer=('momentum',0.75), regularization=('l1+l2',0.7,0.7))
     get_classification_over_validation(trained_mlp)
