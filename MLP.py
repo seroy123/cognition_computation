@@ -1,3 +1,5 @@
+import copy
+
 import WeightInitializations
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,7 +37,7 @@ class MLP:
         """
         This function initialize the weights, the bias and the momentum optimizer previous layer weights.
         """
-        self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).xavier_initialization()
+        self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).random_initialization()
         ## previous attempts
         # self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).random_initialization()
         # self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).he_initialization()
@@ -155,10 +157,10 @@ class MLP:
         for layer in range(hidden_layers_number, -1, -1):
             # get delta
             if layer != hidden_layers_number:
-                delta_of_last_layer = np.copy(delta)
+                delta_of_last_layer = copy.deepcopy(delta)
                 # δ(l)=g'(∑w_ik(l)s_k(l-1)) * ∑δ_n(l+1)w_ni(l+1)
-            delta = self.active_func_derivatives[layer](weights_and_input_multiplication[layer]) * (
-                    self.weights[layer + 1].T @ delta_of_last_layer) if layer != hidden_layers_number else \
+            delta = (self.weights[layer + 1].T @ delta_of_last_layer) * self.active_func_derivatives[layer](weights_and_input_multiplication[layer])\
+                     if layer != hidden_layers_number else \
                 (activation_func_ans[layer] - Y) * self.active_func_derivatives[layer](
                     weights_and_input_multiplication[layer])
             # update delta bias to be delta

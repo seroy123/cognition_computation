@@ -19,7 +19,7 @@ class WeightInitializations:
         weights = []
         bias = [np.random.randn(next_layer, 1) for next_layer in (self.layer_num[1:])]
         for layer, next_layer in zip(self.layer_num[:-1], self.layer_num[1:]):
-            weights += [np.random.randn(layer, next_layer)]
+            weights += [np.random.randn(next_layer, layer)]
         return weights, bias
 
     def xavier_initialization(self):
@@ -49,5 +49,5 @@ class WeightInitializations:
             # calculate the range for the weights
             std = np.sqrt(2.0 / previous_layer_node_number)
             # generate random weights and scale them to the desired range
-            weights += [np.random.randn(layer, next_layer) * std]
+            weights += [np.random.randn(next_layer, layer) * std]
         return weights, bias
