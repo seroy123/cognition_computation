@@ -10,7 +10,6 @@ class MLP:
         """
         This function initialize the network
         :param layer_num: list, number of neurons in each layer. f.e [80 80 80] is a 3 layered net of 80 neurons in each layer.
-        # TODO: check with roey what is optimizer and regularization
         :param optimizer: tuple, optimizer type and size.
         :param regularization: tuple, regularization type and size.
         """
@@ -33,7 +32,6 @@ class MLP:
         self.regularization = regularization
 
     def weight_initialization(self):
-        # TODO: check with roey what is momentum_optimizer_previous_layer_weights
         """
         This function initialize the weights, the bias and the momentum optimizer previous layer weights.
         """
@@ -83,38 +81,6 @@ class MLP:
                     training_data[[val == 0 for val in ans], :][:, 1])
         plt.title(f"The prediction rate on the training set is: {accuracy}")
         plt.show()
-
-    def gradient_descent(self, data: np.ndarray, label: np.ndarray, eta, total_labels_num):
-        """
-        This function update the weights and bias by gradient decent.
-        :param data: np.array, the data we want the network to learn.
-        :param label: np.array, the data classification.
-        :param eta: float, learning rate.
-        :param total_labels_num: int, the number of all the training labels for the regularization.
-        """
-        # do feedforward and back propagation with the data
-        Z, A = self.forward_prop(data)
-        delta_B, delta_W = self.backward_prop(Z, A, data, label)
-        # update Delta_w (ΔW) and Delta_B (ΔB)  with delta_W (δ(W)) and delta_B (δ(B))
-        # ΔW=-ηδ(W), ΔB=-ηδ(B)
-        Delta_B = delta_B
-        for i in range(len(delta_B)):
-            Delta_B[i] = -eta * delta_B[i]
-        Delta_W = delta_W
-        for i in range(len(delta_W)):
-            Delta_W[i] = -eta * delta_W[i]
-        # update weights and bias with Delta_w (ΔW) and Delta_B (ΔB)
-        # TODO: check with roey what is the formula that is used for this (momentum, penalty, regularization)?
-        # W(n) = W(n-1) + ΔW, B(n) = B(n-1) + ΔB
-        for ind, (weight, current_Delta_W, previous_iteration_Delta_W) in enumerate(
-                zip(self.weights, Delta_W, self.momentum_optimizer_previous_layer_weights)):
-            momentum = previous_iteration_Delta_W * self.optimizer[1]
-            penalty = -eta * (1 / total_labels_num) * self.regularization[2] * np.sign(weight) * \
-                      (1 - self.regularization[2]) + -eta * (1 / total_labels_num) * self.regularization[1] * weight  # l1+l2
-            self.momentum_optimizer_previous_layer_weights[ind] = current_Delta_W
-            self.weights[ind] = weight + current_Delta_W + penalty + momentum
-        self.bias = [bias + current_Delta_B for bias, current_Delta_B in
-                     zip(self.bias, Delta_B)]
 
     def forward_prop(self, X):
         """
@@ -169,6 +135,36 @@ class MLP:
             delta_W[layer] = (delta @ activation_func_ans[layer - 1].T) \
                 if layer != 0 else (delta @ X[np.newaxis])
         return delta_B, delta_W
+
+    def gradient_descent(self, data: np.ndarray, label: np.ndarray, eta, total_labels_num):
+        """
+        This function update the weights and bias by gradient decent.
+        :param data: np.array, the data we want the network to learn.
+        :param label: np.array, the data classification.
+        :param eta: float, learning rate.
+        :param total_labels_num: int, the number of all the training labels for the regularization.
+        """
+        # do feedforward and back propagation with the data
+        Z, A = self.forward_prop(data)
+        delta_B, delta_W = self.backward_prop(Z, A, data, label)
+        # update Delta_w (ΔW) and Delta_B (ΔB)  with delta_W (δ(W)) and delta_B (δ(B))
+        # ΔW=-ηδ(W), ΔB=-ηδ(B)
+        Delta_B = delta_B
+        for i in range(len(delta_B)):
+            Delta_B[i] = -eta * delta_B[i]
+        Delta_W = delta_W
+        for i in range(len(delta_W)):
+            Delta_W[i] = -eta * delta_W[i]
+        # update weights and bias with Delta_w (ΔW) and Delta_B (ΔB)
+        # W(n) = W(n-1) + ΔW, B(n) = B(n-1) + ΔB
+        for ind, (weight, current_Delta_W, previous_iteration_Delta_W) in enumerate(
+                zip(self.weights, Delta_W, self.momentum_optimizer_previous_layer_weights)):
+            momentum = previous_iteration_Delta_W * self.optimizer[1]
+            penalty = -eta * (1 / total_labels_num) * self.regularization[2] * np.sign(weight) + -eta * (1 / total_labels_num) * self.regularization[1] * weight  # l1+l2
+            self.momentum_optimizer_previous_layer_weights[ind] = current_Delta_W
+            self.weights[ind] = weight + current_Delta_W + penalty + momentum
+        self.bias = [bias + current_Delta_B for bias, current_Delta_B in
+                     zip(self.bias, Delta_B)]
 
     @staticmethod
     def ReLU(Z):

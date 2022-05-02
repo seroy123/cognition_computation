@@ -50,7 +50,7 @@ if __name__ == '__main__':
     X = X[order]
     Y = Y[order]
     # select sizes of hidden layers
-    number_of_hidden_layers = [30]*2
+    number_of_hidden_layers = [30]
     ## previous attempts
     # number_of_hidden_layers = [30, 15, 12, 15, 2]
     # number_of_hidden_layers = [12, 12]
