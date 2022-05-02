@@ -48,10 +48,10 @@ if __name__ == '__main__':
     order = np.random.permutation(len(Y))
     X = X[order]
     Y = Y[order]
-    # select sizes of hidden layers
-    number_of_hidden_layers = [30]*7
+    # select sizes of hidden layers (list[Nneurons,Nneurons])
+    number_of_hidden_layers = [80]*7
     # train the network
     # optimizer = (method, value(for momentum), regularization = (method, lambda value, penalty parameter value)
-    trained_mlp = call_MLP(X_train=X, Y_train=Y, layers=[2] + number_of_hidden_layers + [1], optimizer=('momentum',0), regularization=('l1+l2',0,0))
+    trained_mlp = call_MLP(X_train=X, Y_train=Y, layers=[2] + number_of_hidden_layers + [1], optimizer=('momentum',0.5), regularization=('l1+l2',0.2,0.2))
     # get the classification for the validation data
     get_classification_over_validation(trained_mlp)

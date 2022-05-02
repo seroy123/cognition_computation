@@ -13,8 +13,8 @@ class MLP:
         :param regularization: tuple, regularization type and size.
         """
         self.layer_num = layer_num
-        self.active_func = [lambda Z: self.ReLU(Z)] * (len(self.layer_num) - 2) + [lambda Z: self.Sigmoid(Z)]
-        self.active_func_derivatives = [lambda Z: self.ReLU_deriv(Z)] * (len(self.layer_num) - 2) + \
+        self.active_func = [lambda Z: self.Sin(Z)] * (len(self.layer_num) - 2) + [lambda Z: self.Sigmoid(Z)]
+        self.active_func_derivatives = [lambda Z: self.Sin_deriv(Z)] * (len(self.layer_num) - 2) + \
                                        [lambda Z: self.Sigmoid_deriv(Z)]
         # self.active_func =  [lambda Z: self.Sin(Z)]+[lambda Z: self.ReLU(Z)] + [lambda Z: self.Sigmoid(Z)]
         # self.active_func_derivatives = [lambda Z: self.Sin_deriv(Z)]+[lambda Z: self.ReLU_deriv(Z)] + \
@@ -73,9 +73,9 @@ class MLP:
             epoch_axis += [i]
             if accuracy == 1:
                 break
-        # plot the accuracy lever of the network throw all the epochs
+        # plot the accuracy level of the network throw all the epochs
         plt.plot(epoch_axis, y_axis)
-        plt.title(f"Convergence on training set with l1+l2 and {'out optimizer' if not self.optimizer[0] else self.optimizer[0]}")
+        plt.title(f"Convergence on training set with momentum and {'out optimizer' if not self.optimizer[0] else self.optimizer[0]}")
         plt.show()
         # plot the classification of the training data by the network
         plt.scatter(training_data[[val == 1 for val in ans], :][:, 0],
