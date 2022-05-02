@@ -4,7 +4,6 @@ import WeightInitializations
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 class MLP:
     def __init__(self, layer_num: list, optimizer, regularization):
         """
@@ -14,16 +13,21 @@ class MLP:
         :param regularization: tuple, regularization type and size.
         """
         self.layer_num = layer_num
-        self.active_func = [lambda Z: self.Sin(Z)] * (len(self.layer_num) - 2) + [lambda Z: self.Sigmoid(Z)]
-        self.active_func_derivatives = [lambda Z: self.Sin_deriv(Z)] * (len(self.layer_num) - 2) + \
+        self.active_func = [lambda Z: self.ReLU(Z)] * (len(self.layer_num) - 2) + [lambda Z: self.Sigmoid(Z)]
+        self.active_func_derivatives = [lambda Z: self.ReLU_deriv(Z)] * (len(self.layer_num) - 2) + \
                                        [lambda Z: self.Sigmoid_deriv(Z)]
-        ## previous attempts
-        # self.active_func = [lambda Z: self.ReLU(Z)] * (len(self.layer_num) - 2) + [lambda Z: self.Sigmoid(Z)]
-        # self.active_func_derivatives = [lambda Z: self.ReLU_deric(Z)] * (len(self.layer_num) - 2) + \
+        # self.active_func =  [lambda Z: self.Sin(Z)]+[lambda Z: self.ReLU(Z)] + [lambda Z: self.Sigmoid(Z)]
+        # self.active_func_derivatives = [lambda Z: self.Sin_deriv(Z)]+[lambda Z: self.ReLU_deriv(Z)] + \
         #                                [lambda Z: self.Sigmoid_deriv(Z)]
-        # self.active_func = [lambda Z: self.Sin(Z)] * (len(self.layer_num) - 2) + [lambda Z: self.ReLU(Z)]
-        # self.active_func_derivatives = [lambda Z: self.Sin_deriv(Z)] * (len(self.layer_num) - 2) + \
-        #                                [lambda Z: self.ReLU_deriv(Z)]
+        #
+        # self.active_func =  [lambda Z: self.ReLU(Z)]+[lambda Z: self.Sin(Z)] + [lambda Z: self.Sigmoid(Z)]
+        # self.active_func_derivatives = [lambda Z: self.ReLU_deriv(Z)]+[lambda Z: self.Sin_deriv(Z)] + \
+        #                                [lambda Z: self.Sigmoid_deriv(Z)]
+
+        # self.active_func =  [lambda Z: self.Sin(Z)] + [lambda Z: self.Sigmoid(Z)]
+        # self.active_func_derivatives = [lambda Z: self.Sin_deriv(Z)] + \
+        #                                [lambda Z: self.Sigmoid_deriv(Z)]
+
         if len(self.active_func) != len(self.layer_num) - 1:
             raise ("number of activation functions must equal to number of layers")
         self.weights = []
@@ -35,12 +39,10 @@ class MLP:
         """
         This function initialize the weights, the bias and the momentum optimizer previous layer weights.
         """
-        self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).random_initialization()
-        ## previous attempts
-        # self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).random_initialization()
-        # self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).he_initialization()
+        global a, b
+        self.weights, self.bias = WeightInitializations.WeightInitializations(self.layer_num).he_initialization()
         self.momentum_optimizer_previous_layer_weights = [np.zeros((np.shape(weight))) for weight in self.weights]
-
+        a,b = copy.deepcopy(self.weights), copy.deepcopy(self.bias)
     def train(self, epochs, training_data, labels, eta):
         """
         This function train the network on the training data by the labels.
@@ -69,6 +71,8 @@ class MLP:
             print(f'epoch number {i}, accuracy={accuracy}')
             y_axis += [accuracy]
             epoch_axis += [i]
+            if accuracy == 1:
+                break
         # plot the accuracy lever of the network throw all the epochs
         plt.plot(epoch_axis, y_axis)
         plt.title(f"Convergence on training set with l1+l2 and {'out optimizer' if not self.optimizer[0] else self.optimizer[0]}")
@@ -226,6 +230,6 @@ class MLP:
         """
         ans = []
         for example in X:
-            current_ans = self.forward_prop(example)[1][1][0]
+            current_ans = self.forward_prop(example)[-1][-1][0]
             ans.append(0 if current_ans <= 0.5 else 1)
         return ans

@@ -7,7 +7,7 @@ def call_MLP(X_train, Y_train, layers, optimizer, regularization):
     # create MLP network
     mlp = MLP.MLP(layers, optimizer, regularization)
     # train the network
-    mlp.train(epochs=200, training_data=X_train, labels=Y_train, eta=0.03)
+    mlp.train(epochs=200, training_data=X_train, labels=Y_train, eta=0.01)
     ## previous attempts
     # mlp.train(epochs=35, training_data=X_train, labels=Y_train, eta=0.001)
     # mlp.train(epochs=20, training_data=X_train, labels=Y_train, eta=0.05)
@@ -49,9 +49,9 @@ if __name__ == '__main__':
     X = X[order]
     Y = Y[order]
     # select sizes of hidden layers
-    number_of_hidden_layers = [30]
+    number_of_hidden_layers = [30]*7
     # train the network
     # optimizer = (method, value(for momentum), regularization = (method, lambda value, penalty parameter value)
-    trained_mlp = call_MLP(X_train=X, Y_train=Y, layers=[2] + number_of_hidden_layers + [1], optimizer=('momentum',0.5), regularization=('l1+l2',0.5,0.5))
+    trained_mlp = call_MLP(X_train=X, Y_train=Y, layers=[2] + number_of_hidden_layers + [1], optimizer=('momentum',0), regularization=('l1+l2',0,0))
     # get the classification for the validation data
     get_classification_over_validation(trained_mlp)
