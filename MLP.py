@@ -71,7 +71,6 @@ class MLP:
             epoch_axis += [i]
         # plot the accuracy lever of the network throw all the epochs
         plt.plot(epoch_axis, y_axis)
-        # TODO: check with roey what does that title means?
         plt.title(f"Convergence on training set with l1+l2 and {'out optimizer' if not self.optimizer[0] else self.optimizer[0]}")
         plt.show()
         # plot the classification of the training data by the network
@@ -160,9 +159,9 @@ class MLP:
         for ind, (weight, current_Delta_W, previous_iteration_Delta_W) in enumerate(
                 zip(self.weights, Delta_W, self.momentum_optimizer_previous_layer_weights)):
             momentum = previous_iteration_Delta_W * self.optimizer[1]
-            penalty = -eta * (1 / total_labels_num) * self.regularization[2] * np.sign(weight) + -eta * (1 / total_labels_num) * self.regularization[1] * weight  # l1+l2
+            penalty = -eta * self.regularization[2] * np.sign(weight) + -eta * self.regularization[1] * weight  # l1+l2
             self.momentum_optimizer_previous_layer_weights[ind] = current_Delta_W
-            self.weights[ind] = weight + current_Delta_W + penalty + momentum
+            self.weights[ind] = weight + current_Delta_W + (1 / total_labels_num) * (penalty + momentum)
         self.bias = [bias + current_Delta_B for bias, current_Delta_B in
                      zip(self.bias, Delta_B)]
 
